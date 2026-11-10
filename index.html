@@ -328,22 +328,24 @@ const smile = (x, y, w = 8) => `<path d="M${x - w/2} ${y} q${w/2} ${w*.65} ${w} 
 const star = (x, y, s, fill, d) => `<path class="twinkle" style="animation-delay:${d}s" d="M${x} ${y-s} L${x+s*.3} ${y-s*.3} L${x+s} ${y} L${x+s*.3} ${y+s*.3} L${x} ${y+s} L${x-s*.3} ${y+s*.3} L${x-s} ${y} L${x-s*.3} ${y-s*.3}Z" fill="${fill}"/>`;
 
 const MASCOTS = {
-  prawn: { label:'Prawn', accent:'#ff8a5c', ink:'#d2552a', wash:'#7fd8cf', art: () => `
-    <g class="bob"><g class="curl">
-      <path class="flap" style="--fo:100% 50%" d="M30 90 L8 78 L14 93 L6 106 L31 100Z" fill="#ff7a4a" ${S}/>
-      <path d="M84 36 C106 52 104 84 77 95 C63 101 47 99 34 92" fill="none" stroke="${OL}" stroke-width="28" stroke-linecap="round"/>
-      <path d="M84 36 C106 52 104 84 77 95 C63 101 47 99 34 92" fill="none" stroke="#ff9466" stroke-width="22.5" stroke-linecap="round"/>
-      <path d="M84 36 C106 52 104 84 77 95 C63 101 47 99 34 92" fill="none" stroke="#e8653a" stroke-width="22.5" stroke-dasharray="2.5 12" opacity=".55"/>
-      <path d="M94 50 C100 62 99 76 90 84" fill="none" stroke="#ffc4a3" stroke-width="4" stroke-linecap="round" opacity=".8"/>
-      <g stroke="${OL}" stroke-width="2.5" stroke-linecap="round"><path d="M68 106 l-2 8"/><path d="M56 106 l-1 8"/><path d="M80 101 l3 7"/></g>
-    </g>
-    <path class="feel" d="M78 22 C74 8 62 4 52 7" fill="none" ${S}/>
-    <path class="feel" style="animation-delay:-.7s" d="M90 22 C94 9 105 6 113 11" fill="none" ${S}/>
-    <circle cx="84" cy="34" r="20" fill="#ff8a5c" ${S}/>
-    ${eyes(77, 33, 91, 33, 3.2)}
-    <g fill="#fff" fill-opacity=".35" stroke="#2fb3ad" stroke-width="2.6"><circle cx="77" cy="33" r="7.5"/><circle cx="91" cy="33" r="7.5"/></g>
-    <path d="M84.5 32 h-1" stroke="#2fb3ad" stroke-width="2.6"/>
-    ${blush(72, 96, 42)}${smile(84, 43, 7)}</g>` },
+  prawn: { label:'Prawn', accent:'#ff8a3d', ink:'#d9581a', wash:'#ffc59a', art: () => `
+    ${star(14, 34, 6, '#ffd36b', -.4)}${star(106, 100, 5, '#ffb3cf', -1.2)}
+    <g class="bob"><g class="sway">
+      <g class="flap" style="--fo:100% 30%">
+        <path d="M37 92 L14 79 Q7 91 14 99 Q9 108 18 113 L39 98Z" fill="#ff7a2e" ${S}/>
+        <path d="M34 94 L17 87 M34 96 L19 106" stroke="#ffb27a" stroke-width="2.2" stroke-linecap="round"/>
+      </g>
+      <g stroke="${OL}" stroke-width="2.4" stroke-linecap="round"><path d="M55 91 l-3 -6"/><path d="M63 88 l-5 -5"/><path d="M69 82 l-6 -3"/></g>
+      <path d="M90 58 C102 76 93 104 62 106 C50 107 41 102 34 94 C46 94 58 92 66 86 C76 78 76 66 70 58Z" fill="#ff8a3d"/>
+      <path d="M41 97 C51 96 60 93 67 87 C74 80 76 70 73 62" fill="none" stroke="#ffc48f" stroke-width="5" stroke-linecap="round" opacity=".85"/>
+      <g fill="none" stroke="#e5651f" stroke-width="2.5" stroke-linecap="round"><path d="M97 76 Q86 71 76 72"/><path d="M85 99 Q75 91 68 85"/><path d="M64 106 Q61 98 57 91"/><path d="M46 104 Q46 98 44 94"/></g>
+      <path d="M90 58 C102 76 93 104 62 106 C50 107 41 102 34 94 C46 94 58 92 66 86 C76 78 76 66 70 58Z" fill="none" ${S}/>
+      <path class="feel" d="M63 28 C59 14 49 8 38 10" fill="none" ${S}/>
+      <path class="feel" style="animation-delay:-.7s" d="M77 28 C81 14 91 8 102 12" fill="none" ${S}/>
+      <circle cx="70" cy="48" r="24" fill="#ff9a4d" ${S}/>
+      <ellipse cx="59" cy="35" rx="7" ry="4" fill="#fff" opacity=".55" transform="rotate(-28 59 35)"/>
+      ${eyes(62, 48, 78, 48, 4.6)}${blush(54, 86, 57)}${smile(70, 57, 8)}
+    </g></g>` },
 
   fish: { label:'Fish', accent:'#ff6fae', ink:'#c93a83', wash:'#ffb3d4', art: () => `
     <circle class="bubble" cx="14" cy="44" r="4" fill="none" stroke="#7fc7ff" stroke-width="2"/>
