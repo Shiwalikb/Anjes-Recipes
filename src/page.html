@@ -782,7 +782,8 @@ function paintThemeBtn(){
   b.innerHTML = d ? ICON_SUN : ICON_MOON; b.setAttribute('aria-label', d ? 'Switch to light mode' : 'Switch to dark mode');
 }
 const savedTheme = store.get('anje-theme');
-if (savedTheme === 'dark' || savedTheme === 'light') document.documentElement.dataset.theme = savedTheme;
+// light by default; dark only when she switches it on
+document.documentElement.dataset.theme = savedTheme === 'dark' ? 'dark' : 'light';
 $('#theme-btn').addEventListener('click', () => {
   const next = isDark() ? 'light' : 'dark';
   document.documentElement.dataset.theme = next; store.set('anje-theme', next); paintThemeBtn();
