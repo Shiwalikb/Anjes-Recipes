@@ -15,6 +15,8 @@
   --font-flow:'Dancing Script','Snell Roundhand',cursive;
   --font-hand:'Caveat','Bradley Hand','Comic Sans MS',cursive;
   --font-ui:'Quicksand',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --sky:#a9d8ff; --glow-1:rgba(255,183,214,.55); --glow-2:rgba(201,182,255,.45); --glow-3:rgba(159,227,207,.45); --glow-4:rgba(255,226,140,.5); --glow-5:rgba(255,190,150,.45);
+  --card-tint:10%;
   --lift:0%;
   color-scheme:light;
 }
@@ -23,14 +25,14 @@
   --ink:#f8e8f0; --ink-soft:#c7a8b9; --rule:#3f2e40; --pink:#ff9fc4; --pink-strong:#ff8bbb;
   --mint:#6fbfa8; --lav:#a690e3; --butter:#d6ba5e; --peach:#df9f80;
   --hl:rgba(255,200,90,.34); --note:#4a3d26; --note-ink:#f5e6c4;
-  --shadow:0 16px 34px -16px rgba(0,0,0,.75); --scrim:rgba(10,5,12,.65); --lift:55%; color-scheme:dark;
+  --shadow:0 16px 34px -16px rgba(0,0,0,.75); --scrim:rgba(10,5,12,.65); --lift:55%; --sky:#6fa8d6; --glow-1:rgba(255,120,180,.16); --glow-2:rgba(160,130,255,.16); --glow-3:rgba(90,200,170,.12); --glow-4:rgba(230,190,80,.1); --glow-5:rgba(255,150,110,.12); --card-tint:12%; color-scheme:dark;
 }}
 :root[data-theme="dark"]{
   --bg:#1c1420; --check:rgba(255,140,190,.055); --paper:#2a1f2d; --paper-2:#322437;
   --ink:#f8e8f0; --ink-soft:#c7a8b9; --rule:#3f2e40; --pink:#ff9fc4; --pink-strong:#ff8bbb;
   --mint:#6fbfa8; --lav:#a690e3; --butter:#d6ba5e; --peach:#df9f80;
   --hl:rgba(255,200,90,.34); --note:#4a3d26; --note-ink:#f5e6c4;
-  --shadow:0 16px 34px -16px rgba(0,0,0,.75); --scrim:rgba(10,5,12,.65); --lift:55%; color-scheme:dark;
+  --shadow:0 16px 34px -16px rgba(0,0,0,.75); --scrim:rgba(10,5,12,.65); --lift:55%; --sky:#6fa8d6; --glow-1:rgba(255,120,180,.16); --glow-2:rgba(160,130,255,.16); --glow-3:rgba(90,200,170,.12); --glow-4:rgba(230,190,80,.1); --glow-5:rgba(255,150,110,.12); --card-tint:12%; color-scheme:dark;
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
@@ -253,6 +255,36 @@ details.raw pre{white-space:pre-wrap;background:var(--paper-2);border-radius:12p
 @keyframes twinkle{0%,100%{transform:scale(.5);opacity:.35}50%{transform:scale(1.1);opacity:1}}
 .mascot .stir{animation:stir 1.2s ease-in-out infinite alternate;transform-box:view-box;transform-origin:60px 60px}
 @keyframes stir{from{transform:rotate(-10deg)}to{transform:rotate(12deg)}}
+
+/* ---------- extra colour ---------- */
+body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(38vmax 30vmax at 8% 12%,var(--glow-2),transparent 70%),
+    radial-gradient(34vmax 28vmax at 92% 18%,var(--glow-4),transparent 70%),
+    radial-gradient(40vmax 32vmax at 85% 88%,var(--glow-3),transparent 70%),
+    radial-gradient(36vmax 30vmax at 12% 85%,var(--glow-5),transparent 70%),
+    radial-gradient(30vmax 24vmax at 50% 50%,var(--glow-1),transparent 70%)}
+.topbar{border-bottom:0}
+.topbar::after{content:"";display:block;height:4px;background:linear-gradient(90deg,var(--pink),var(--peach),var(--butter),var(--mint),var(--sky),var(--lav),var(--pink))}
+.hello{display:inline-block;background:linear-gradient(90deg,var(--pink),var(--peach),var(--butter),var(--mint),var(--sky),var(--lav)) no-repeat 0 92%/100% 7px;padding-bottom:4px}
+.hello b{background:linear-gradient(90deg,var(--pink-strong),#ff8a3d 60%,#b76ee8);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sprinkles{display:inline-flex;gap:6px;margin-left:10px;font-size:1.1rem;vertical-align:middle}
+.sprinkles span:nth-child(1){color:var(--pink)}.sprinkles span:nth-child(2){color:var(--butter)}.sprinkles span:nth-child(3){color:var(--mint)}.sprinkles span:nth-child(4){color:var(--lav)}
+.chip{--c:var(--pink)}
+.chips .chip:nth-child(6n+2){--c:var(--peach)}.chips .chip:nth-child(6n+3){--c:var(--mint)}.chips .chip:nth-child(6n+4){--c:var(--sky)}.chips .chip:nth-child(6n+5){--c:var(--lav)}.chips .chip:nth-child(6n){--c:var(--butter)}
+.chip{background:color-mix(in srgb,var(--c) 22%,var(--paper));border-color:color-mix(in srgb,var(--c) 70%,transparent)}
+.chip[aria-pressed="true"]{background:var(--c);border-color:var(--c);color:#3a1326}
+.card{background-color:color-mix(in srgb,var(--accent) var(--card-tint),var(--paper))}
+.card-meta{color:color-mix(in srgb,var(--accent-ink,var(--ink-soft)) 75%,var(--ink-soft))}
+.card-peek li::before{color:var(--accent)}
+.steps li:nth-child(5n+1){--sc:var(--pink)}.steps li:nth-child(5n+2){--sc:var(--peach)}.steps li:nth-child(5n+3){--sc:var(--mint)}.steps li:nth-child(5n+4){--sc:var(--sky)}.steps li:nth-child(5n){--sc:var(--lav)}
+.steps li::before{background:color-mix(in srgb,var(--sc) 45%,var(--paper));border-color:var(--sc)}
+.steps li.done::before{background:var(--sc)}
+.meta span:nth-child(3n+1){background:color-mix(in srgb,var(--mint) 25%,var(--paper));border-color:var(--mint)}
+.meta span:nth-child(3n+2){background:color-mix(in srgb,var(--butter) 30%,var(--paper));border-color:var(--butter)}
+.meta span:nth-child(3n){background:color-mix(in srgb,var(--lav) 25%,var(--paper));border-color:var(--lav)}
+.panel{background-image:linear-gradient(135deg,color-mix(in srgb,var(--lav) 12%,transparent),transparent 40%,color-mix(in srgb,var(--mint) 12%,transparent))}
+.foot .love{background:linear-gradient(90deg,var(--pink-strong),#ff8a3d,#b76ee8);-webkit-background-clip:text;background-clip:text;color:transparent;display:inline-block}
 @media (prefers-reduced-motion: reduce){
   .mascot *:not(.blink){animation:none!important}
   .card,.btn,.polaroid{transition:none}
@@ -882,7 +914,7 @@ function renderHome(){
   const tilts = ['-1.4deg', '1deg', '-.6deg', '1.6deg', '-1deg', '.5deg'];
   view.innerHTML = `
     <section class="hero">
-      <div><h1 class="hello">${hello}</h1>
+      <div><h1 class="hello">${hello}</h1><span class="sprinkles" aria-hidden="true"><span>♥</span><span>✦</span><span>♥</span><span>✦</span></span>
       <p class="count">${recipes.length} ${recipes.length === 1 ? 'recipe' : 'recipes'} in the book${query ? ` · ${list.length} matching “${esc(query)}”` : ''}</p></div>
     </section>
     ${recipes.length ? `<div class="chips filters">${chip('all', 'All')}${chip('fav', '♥ Favourites')}${cats.map(c => chip(c, esc(c))).join('')}</div>` : ''}
@@ -1221,7 +1253,7 @@ function onFormAction(a, el){
    ===================================================================== */
 function renderFoot(){
   const local = backend.mode === 'local';
-  $('#foot').innerHTML = `<div class="love">made with love for Anje ♡</div>
+  $('#foot').innerHTML = `<div class="love">made with love by Anje ♡</div>
     <div>${local ? 'Recipes are saved in this browser on this device.' : 'Recipes are saved to this page, so they show up on any device.'}</div>
     ${local && !window.claude ? `<div class="row"><button class="btn btn-soft" type="button" id="bk-out">Back up recipes</button>
       <label class="btn btn-soft" for="bk-in">Restore a backup</label><input id="bk-in" type="file" accept="application/json,.json" hidden></div>` : ''}`;
