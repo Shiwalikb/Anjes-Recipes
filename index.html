@@ -769,7 +769,7 @@ async function smallDataURL(blob){
 }
 /* Free cloud sync: paste your Supabase project's URL and publishable (anon) key here.
    Both are safe to be public; the database's sign-in rules keep the recipes private. */
-const CLOUD = { url: '', key: '' };
+const CLOUD = { url: 'https://mmnfbgksfbhdvszyhanx.supabase.co', key: 'sb_publishable_820gsT1-8myn4_4HkOWLbg_vx6lNPIu' };
 const cloudPhotoURL = path => CLOUD.url.replace(/\/$/, '') + '/storage/v1/object/public/photos/' + path.split('/').map(encodeURIComponent).join('/');
 const photoSrc = p => p.asset ? '/_blob/' + p.asset : p.cloud ? cloudPhotoURL(p.cloud) : (p.data || p.src || '');
 
