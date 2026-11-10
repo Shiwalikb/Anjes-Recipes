@@ -363,12 +363,12 @@ body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
 .crop-tools{justify-content:center;margin-top:12px}
 .crop-card .row:last-child{justify-content:flex-end}
 .sync-btn{position:relative}
-.sync-btn i{position:absolute;right:6px;bottom:7px;width:9px;height:9px;border-radius:50%;border:2px solid var(--paper);background:#b9a7b2}
-.sync-btn[data-state="ok"] i{background:#4fc79a}
-.sync-btn[data-state="syncing"] i{background:#ffc93c;animation:pulse 1s ease-in-out infinite alternate}
-.sync-btn[data-state="error"] i{background:#e5536b}
-.sync-btn[data-state="offline"] i{background:#9aa6b5}
-@keyframes pulse{to{transform:scale(1.35)}}
+.sync-btn i{position:absolute;right:1px;bottom:2px;width:17px;height:17px;border-radius:50%;border:2px solid var(--paper);background:#9c8a96;color:#fff;font-style:normal;font-size:11px;font-weight:800;line-height:13px;text-align:center;font-family:system-ui,-apple-system,sans-serif}
+.sync-btn[data-state="ok"] i{background:#2fa477}
+.sync-btn[data-state="syncing"] i{background:#d99a1e;animation:spin 1s linear infinite}
+.sync-btn[data-state="error"] i{background:#d43a55}
+.sync-btn[data-state="offline"] i{background:#7d8796}
+@keyframes spin{to{transform:rotate(360deg)}}
 .sync-form{display:grid;gap:6px;text-align:left;margin-top:6px}
 .sync-form label{font-weight:700;font-size:.82rem;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-soft)}
 .sync-form input{width:100%;border:2px solid var(--rule);border-radius:14px;padding:10px 14px;background:var(--paper-2);outline:none}
@@ -1680,7 +1680,8 @@ function paintSync(){
   const b = $('#sync-btn'); if (!b || b.hidden) return;
   const st = Sync.user ? Sync.state : 'off';
   const label = { off:'Sign in to sync', syncing:'Syncing…', ok:'Synced', error:'Sync problem, tap for details', offline:'Offline, will sync later' }[st] || 'Sync';
-  b.dataset.state = st; b.innerHTML = ICON_CLOUD + '<i aria-hidden="true"></i>';
+  const glyph = { ok:'✓', syncing:'↻', error:'!', offline:'–', off:'+' }[st] || '';
+  b.dataset.state = st; b.innerHTML = ICON_CLOUD + '<i aria-hidden="true">' + glyph + '</i>';
   b.setAttribute('aria-label', label); b.title = label;
   const m = $('#sync-status'); if (m) m.textContent = syncLine();
 }
