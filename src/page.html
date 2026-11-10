@@ -2,7 +2,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Dancing+Script:wght@600;700&family=Pacifico&family=Quicksand:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Dancing+Script:wght@600;700&family=Pacifico&family=Quicksand:wght@400;500;600;700&display=swap">
 <style>
 /* Layout: a pink gingham tablecloth; each recipe is a taped journal page with its own little animated mascot */
 :root{
@@ -14,6 +14,7 @@
   --font-script:'Pacifico','Dancing Script','Snell Roundhand',cursive;
   --font-flow:'Dancing Script','Snell Roundhand',cursive;
   --font-hand:'Caveat','Bradley Hand','Comic Sans MS',cursive;
+  --font-serif:'Fraunces',Georgia,'Times New Roman',serif;
   --font-ui:'Quicksand',system-ui,-apple-system,'Segoe UI',sans-serif;
   --sky:#a9d8ff; --glow-1:rgba(255,183,214,.55); --glow-2:rgba(201,182,255,.45); --glow-3:rgba(159,227,207,.45); --glow-4:rgba(255,226,140,.5); --glow-5:rgba(255,190,150,.45);
   --card-tint:10%;
@@ -285,6 +286,59 @@ body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
 .meta span:nth-child(3n){background:color-mix(in srgb,var(--lav) 25%,var(--paper));border-color:var(--lav)}
 .panel{background-image:linear-gradient(135deg,color-mix(in srgb,var(--lav) 12%,transparent),transparent 40%,color-mix(in srgb,var(--mint) 12%,transparent))}
 .foot .love{background:linear-gradient(90deg,var(--pink-strong),#ff8a3d,#b76ee8);-webkit-background-clip:text;background-clip:text;color:transparent;display:inline-block}
+
+/* ---------- premium layer ---------- */
+:root{--rose:#c98a8f;--rose-2:#f1c7b8;--gold:linear-gradient(100deg,#c9897a,#f3cdb8 40%,#d99a86 60%,#f6dccb);--grain:.55;
+  --shadow:0 1px 2px rgba(150,70,100,.08),0 6px 14px -8px rgba(190,80,125,.25),0 26px 50px -28px rgba(190,80,125,.55)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--grain:.25;--shadow:0 1px 2px rgba(0,0,0,.3),0 26px 50px -24px rgba(0,0,0,.8)}}
+:root[data-theme="dark"]{--grain:.25;--shadow:0 1px 2px rgba(0,0,0,.3),0 26px 50px -24px rgba(0,0,0,.8)}
+::selection{background:var(--pink);color:#3a1326}
+.card::after,.page::after,.hero-card::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .28 0 0 0 0 .36 0 0 0 .22 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");opacity:var(--grain);mix-blend-mode:multiply}
+.topbar{background:color-mix(in srgb,var(--bg) 72%,transparent);backdrop-filter:blur(16px) saturate(1.4);-webkit-backdrop-filter:blur(16px) saturate(1.4)}
+.btn-primary{background:linear-gradient(135deg,color-mix(in srgb,var(--pink-strong) 80%,#ff9a6b),var(--pink-strong) 55%,color-mix(in srgb,var(--pink-strong) 85%,#9a5cd6));box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 8px 20px -8px color-mix(in srgb,var(--pink-strong) 70%,transparent)}
+.btn-primary:hover{box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 12px 26px -8px color-mix(in srgb,var(--pink-strong) 80%,transparent)}
+.hero{display:block;padding-block:30px 6px}
+.hero-card{position:relative;overflow:hidden;border-radius:32px;padding:clamp(22px,4vw,40px) clamp(20px,4vw,44px) 22px;
+  background:linear-gradient(135deg,color-mix(in srgb,var(--paper) 82%,transparent),color-mix(in srgb,var(--paper-2) 62%,transparent));
+  border:1px solid color-mix(in srgb,#fff 55%,transparent);box-shadow:var(--shadow);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.hero-card::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1.5px;background:var(--gold);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;opacity:.75;pointer-events:none}
+.eyebrow{margin:0 0 6px;font-family:var(--font-serif);font-style:italic;font-size:1rem;letter-spacing:.02em;color:var(--rose)}
+.eyebrow::before,.eyebrow::after{content:"";display:inline-block;width:28px;height:1px;background:var(--gold);vertical-align:middle;margin:0 10px 0 0}
+.eyebrow::after{margin:0 0 0 10px}
+.hello{font-size:clamp(1.9rem,5vw,3rem);line-height:1.15}
+.hero-sub{margin:10px 0 0;font-family:var(--font-serif);font-size:1.05rem;color:var(--ink-soft)}
+.hero-sub em{font-style:italic;font-weight:600;color:var(--pink-strong);font-size:1.2em}
+.crew-wrap{margin-top:22px;border-top:1px solid color-mix(in srgb,var(--rose) 35%,transparent);padding-top:14px}
+.crew-label{margin:0 0 8px;font-size:.78rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft)}
+.crew{-webkit-mask-image:linear-gradient(90deg,#000 88%,transparent);mask-image:linear-gradient(90deg,#000 88%,transparent);display:flex;gap:6px;overflow-x:auto;padding:8px 4px 10px;margin:0 -4px;scrollbar-width:thin;scroll-snap-type:x proximity}
+.crew-mate{flex:0 0 auto;width:78px;display:flex;flex-direction:column;align-items:center;gap:2px;border:0;background:transparent;cursor:pointer;padding:6px 2px;border-radius:18px;scroll-snap-align:start;transition:background .2s,transform .2s}
+.crew.intro .crew-mate{animation:pop-in .55s cubic-bezier(.2,1.4,.4,1) backwards;animation-delay:var(--d)}
+.crew-mate .mascot{width:60px;height:60px;filter:drop-shadow(0 6px 6px rgba(120,50,80,.18))}
+.crew-mate span{font-size:.72rem;font-weight:700;color:var(--ink-soft);white-space:nowrap}
+.crew-mate:hover{background:color-mix(in srgb,var(--accent) 18%,transparent);transform:translateY(-3px)}
+.crew-mate:hover .mascot{animation:hop .6s ease}
+.crew-mate.on{background:color-mix(in srgb,var(--accent) 30%,transparent);box-shadow:inset 0 0 0 2px var(--accent)}
+.crew-mate.idle .mascot{opacity:.8}
+@keyframes pop-in{from{transform:translateY(16px) scale(.6);opacity:0}}
+.grid.intro .card{animation:rise .7s cubic-bezier(.2,.8,.2,1) backwards;animation-delay:calc(var(--i,0) * 80ms + 150ms)}
+@keyframes rise{from{transform:translateY(22px) rotate(0deg);opacity:0}}
+.card{border:1px solid color-mix(in srgb,#fff 50%,transparent)}
+.card-title{font-size:1.55rem}
+.card-art .mascot{filter:drop-shadow(0 10px 8px rgba(120,50,80,.18))}
+.r-mascot{position:relative;isolation:isolate}
+.r-mascot::after{content:"";position:absolute;left:22%;right:22%;bottom:2%;height:9%;border-radius:50%;background:radial-gradient(closest-side,rgba(90,40,60,.22),transparent);z-index:-1}
+.r-eyebrow{font-family:var(--font-serif);font-style:italic;text-transform:none;letter-spacing:.02em;font-size:1rem;font-weight:500}
+.page{box-shadow:var(--shadow)}
+.hand-h::after{background:var(--gold);opacity:1;height:3px;width:90px}
+.tip,.sub{font-family:var(--font-serif);font-style:italic}
+.parade{display:flex;justify-content:center;gap:4px;margin-bottom:6px}
+.parade .mascot{width:44px;height:44px}
+.parade .mascot:nth-child(odd){transform:translateY(-4px)}
+.foot .love{font-size:1.7rem}
+.mascot .flicker{animation:flicker .45s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:50% 100%}
+@keyframes flicker{to{transform:scale(.86,1.1) rotate(5deg)}}
+::view-transition-old(root),::view-transition-new(root){animation-duration:.28s}
+@media (prefers-reduced-motion: reduce){.crew.intro .crew-mate,.grid.intro .card{animation:none}}
 @media (prefers-reduced-motion: reduce){
   .mascot *:not(.blink){animation:none!important}
   .card,.btn,.polaroid{transition:none}
@@ -475,6 +529,94 @@ const MASCOTS = {
       ${eyes(51, 60, 69, 60, 3.6)}${blush(44, 76, 69)}${smile(60, 68, 7)}
     </g></g>` },
 
+  cake: { label:'Cake', accent:'#ff9cc6', ink:'#cf4f8a', wash:'#ffd1e3', art: () => `
+    ${star(16, 40, 6, '#ffd36b', -.3)}${star(104, 44, 6, '#c9b6ff', -1.1)}
+    <g class="bob">
+      <ellipse cx="60" cy="106" rx="46" ry="7" fill="#dff0ff" ${S}/>
+      <rect x="22" y="54" width="76" height="50" rx="10" fill="#ffe2ec" ${S}/>
+      <rect x="23.5" y="76" width="73" height="8" fill="#ff9cc6"/>
+      <path d="M22 62 Q22 48 36 48 H84 Q98 48 98 62 q-6 8 -12 2 q-6 8 -12 0 q-6 8 -12 0 q-6 8 -12 0 q-6 8 -12 0 q-6 6 -12 -2Z" fill="#fff8f0" ${S}/>
+      <rect x="57" y="26" width="6" height="22" rx="2" fill="#c9b6ff" ${S}/>
+      <path class="flicker" d="M60 10 C66 18 66 24 60 26 C54 24 54 18 60 10Z" fill="#ffc93c" ${S}/>
+      <circle cx="36" cy="48" r="5" fill="#ff4f7a" ${S}/><circle cx="84" cy="48" r="5" fill="#ff4f7a" ${S}/>
+      ${eyes(49, 92, 71, 92, 3.6)}${blush(42, 78, 99)}${smile(60, 98, 7)}
+    </g>` },
+
+  donut: { label:'Donut', accent:'#ff8fbf', ink:'#c9437f', wash:'#ffd8a8', art: () => `
+    ${star(14, 28, 6, '#c9b6ff', -.6)}${star(106, 98, 6, '#ffd36b', -1.4)}
+    <g class="bob"><g class="sway">
+      <path fill-rule="evenodd" d="M20 62a40 40 0 1 0 80 0a40 40 0 1 0 -80 0Z M49 60a11 11 0 1 0 22 0a11 11 0 1 0 -22 0Z" fill="#efb27a" ${S}/>
+      <path fill-rule="evenodd" d="M60 27 C80 25 95 38 95 55 C99 70 90 90 71 93 C53 99 31 92 27 73 C22 55 37 29 60 27Z M47 60a13 13 0 1 0 26 0a13 13 0 1 0 -26 0Z" fill="#ff9cc6" ${S}/>
+      <g stroke-width="3.2" stroke-linecap="round"><path d="M40 40 l5 -2" stroke="#7fd8cf"/><path d="M76 38 l4 3" stroke="#ffd36b"/><path d="M86 56 l3 4" stroke="#c9b6ff"/><path d="M34 58 l-1 5" stroke="#ffd36b"/><path d="M58 34 l4 1" stroke="#c9b6ff"/><path d="M84 74 l-4 3" stroke="#7fd8cf"/></g>
+      ${eyes(48, 80, 72, 80, 3.6)}${blush(41, 79, 87)}${smile(60, 86, 7)}
+    </g></g>` },
+
+  icecream: { label:'Ice cream', accent:'#9fd8ff', ink:'#3a8fc9', wash:'#c9e8ff', art: () => `
+    ${star(18, 30, 6, '#ffb3cf', -.2)}${star(102, 34, 5, '#ffd36b', -1)}
+    <g class="bob"><g class="sway">
+      <path d="M38 60 L82 60 L60 112Z" fill="#f2c27d" ${S}/>
+      <path d="M45 68 L70 96 M55 64 L76 84 M75 68 L52 96 M65 64 L45 84" stroke="#d99a4e" stroke-width="2.2" stroke-linecap="round"/>
+      <path d="M36 52 C36 26 84 26 84 52 C84 58 82 62 79 62 q-3 9 -7 0 q-4 11 -8 0 q-3 7 -6 0 q-4 10 -8 0 q-3 7 -7 0 C38 62 36 58 36 52Z" fill="#ffb3cf" ${S}/>
+      <g stroke-width="3" stroke-linecap="round"><path d="M46 38 l4 -2" stroke="#7fd8cf"/><path d="M70 36 l3 3" stroke="#ffd36b"/><path d="M76 48 l3 -2" stroke="#c9b6ff"/></g>
+      <path d="M60 22 q2 -8 9 -11" fill="none" ${S}/>
+      <circle cx="60" cy="25" r="6" fill="#ff4f7a" ${S}/>
+      ${eyes(51, 47, 69, 47, 3.4)}${blush(45, 75, 55)}${smile(60, 54, 6)}
+    </g></g>` },
+
+  sushi: { label:'Sushi', accent:'#ff9a6b', ink:'#d2603a', wash:'#bfe8d8', art: () => `
+    ${star(16, 36, 6, '#ffd36b', -.5)}${star(104, 100, 5, '#ffb3cf', -1.3)}
+    <g class="bob">
+      <rect x="22" y="58" width="76" height="42" rx="18" fill="#fffdf8" ${S}/>
+      <g fill="#ece2d2"><ellipse cx="34" cy="92" rx="3" ry="1.8"/><ellipse cx="88" cy="90" rx="3" ry="1.8"/><ellipse cx="30" cy="76" rx="2.6" ry="1.6"/><ellipse cx="90" cy="74" rx="2.6" ry="1.6"/></g>
+      <path d="M18 58 C22 40 98 38 102 56 C103 64 95 68 86 66 C72 63 44 66 30 68 C22 68 18 64 18 58Z" fill="#ff9a6b" ${S}/>
+      <g fill="none" stroke="#ffd7c4" stroke-width="3" stroke-linecap="round"><path d="M38 50 q6 8 2 14"/><path d="M56 47 q6 8 2 16"/><path d="M74 47 q6 8 2 16"/></g>
+      ${eyes(49, 82, 71, 82, 3.6)}${blush(42, 78, 90)}${smile(60, 89, 7)}
+    </g>` },
+
+  burger: { label:'Burger', accent:'#f2a65a', ink:'#b8661e', wash:'#ffe08a', art: () => `
+    <g class="bob">
+      <path d="M24 88 H96 Q96 104 80 104 H40 Q24 104 24 88Z" fill="#f2b06b" ${S}/>
+      <rect x="20" y="74" width="80" height="15" rx="7.5" fill="#7a4a32" ${S}/>
+      <path d="M22 72 H98 L90 82 L82 74 L72 84 L62 74 L52 82 L42 74 L32 82Z" fill="#ffd23f" ${S}/>
+      <path d="M18 70 q6 -8 12 0 q6 -8 12 0 q6 -8 12 0 q6 -8 12 0 q6 -8 12 0 q6 -8 12 0 q6 -8 12 0" fill="#7ed67a" ${S}/>
+      <path d="M22 66 C22 30 98 30 98 66Z" fill="#f7b56f" ${S}/>
+      <g fill="#fff3d6"><ellipse cx="44" cy="42" rx="3" ry="1.7" transform="rotate(-20 44 42)"/><ellipse cx="60" cy="38" rx="3" ry="1.7"/><ellipse cx="76" cy="42" rx="3" ry="1.7" transform="rotate(20 76 42)"/><ellipse cx="36" cy="54" rx="2.6" ry="1.5"/><ellipse cx="84" cy="54" rx="2.6" ry="1.5"/></g>
+      ${eyes(50, 52, 70, 52, 3.6)}${blush(43, 77, 60)}${smile(60, 59, 7)}
+    </g>` },
+
+  croissant: { label:'Croissant', accent:'#f2b45f', ink:'#b8741e', wash:'#ffe3b3', art: () => `
+    ${star(18, 32, 6, '#ffd36b', -.4)}${star(102, 30, 5, '#ffb3cf', -1.2)}
+    <g class="bob"><g class="sway">
+      <ellipse cx="22" cy="82" rx="9" ry="14" transform="rotate(-50 22 82)" fill="#eea14a" ${S}/>
+      <ellipse cx="98" cy="82" rx="9" ry="14" transform="rotate(50 98 82)" fill="#eea14a" ${S}/>
+      <ellipse cx="38" cy="72" rx="14" ry="20" transform="rotate(-28 38 72)" fill="#f4b45f" ${S}/>
+      <ellipse cx="82" cy="72" rx="14" ry="20" transform="rotate(28 82 72)" fill="#f4b45f" ${S}/>
+      <ellipse cx="60" cy="66" rx="19" ry="25" fill="#f7c271" ${S}/>
+      <path d="M46 52 q14 -8 28 0 M44 84 q16 8 32 0" fill="none" stroke="#d98a2e" stroke-width="2.4" stroke-linecap="round"/>
+      ${eyes(53, 65, 67, 65, 3.4)}${blush(47, 73, 73)}${smile(60, 73, 6)}
+    </g></g>` },
+
+  dumpling: { label:'Dumpling', accent:'#e8cfa8', ink:'#a8763a', wash:'#d8eccf', art: () => `
+    <path class="steam" d="M46 30 q-6 -7 0 -14 q6 -7 0 -14" fill="none" stroke="#c9b6ff" stroke-width="3" stroke-linecap="round" transform="translate(0 6)"/>
+    <path class="steam" style="animation-delay:-1.3s" d="M74 30 q-6 -7 0 -14 q6 -7 0 -14" fill="none" stroke="#ffb3cf" stroke-width="3" stroke-linecap="round" transform="translate(0 6)"/>
+    <g class="bob">
+      <ellipse cx="60" cy="104" rx="44" ry="6" fill="#bfe3c8" ${S}/>
+      <path d="M18 86 C18 54 40 38 60 38 C80 38 102 54 102 86 C102 98 90 102 60 102 C30 102 18 98 18 86Z" fill="#fff8ee" ${S}/>
+      <path d="M44 44 q5 8 0 16 M54 40 q4 9 0 18 M66 40 q-4 9 0 18 M76 44 q-5 8 0 16" fill="none" stroke="#dcc6a8" stroke-width="2.6" stroke-linecap="round"/>
+      ${eyes(48, 76, 72, 76, 3.8)}${blush(41, 79, 85)}${smile(60, 84, 8)}
+    </g>` },
+
+  strawberry: { label:'Strawberry', accent:'#ff6b88', ink:'#d13a5c', wash:'#ffc4d2', art: () => `
+    ${star(16, 36, 6, '#ffd36b', -.2)}${star(104, 90, 5, '#c9b6ff', -1.1)}
+    <g class="bob"><g class="sway">
+      <path d="M60 108 C34 98 20 72 24 54 C28 38 46 34 60 40 C74 34 92 38 96 54 C100 72 86 98 60 108Z" fill="#ff5a78" ${S}/>
+      <g fill="#ffe08a"><ellipse cx="38" cy="58" rx="1.8" ry="2.6"/><ellipse cx="82" cy="58" rx="1.8" ry="2.6"/><ellipse cx="34" cy="76" rx="1.8" ry="2.6"/><ellipse cx="86" cy="76" rx="1.8" ry="2.6"/><ellipse cx="46" cy="92" rx="1.8" ry="2.6"/><ellipse cx="74" cy="92" rx="1.8" ry="2.6"/><ellipse cx="60" cy="98" rx="1.8" ry="2.6"/></g>
+      <path d="M60 44 L46 32 L52 44 L36 42 L50 50 L60 46 L70 50 L84 42 L68 44 L74 32Z" fill="#6fcf97" ${S}/>
+      <path d="M60 40 q1 -10 7 -14" fill="none" ${S}/>
+      <ellipse cx="44" cy="62" rx="5" ry="3" fill="#fff" opacity=".4" transform="rotate(-30 44 62)"/>
+      ${eyes(50, 70, 70, 70, 3.8)}${blush(43, 77, 79)}${smile(60, 79, 7)}
+    </g></g>` },
+
   pot: { label:'Cooking pot', accent:'#ff9cc6', ink:'#cf4f8a', wash:'#ffc4dc', art: () => `
     <path class="steam" d="M44 28 q-6 -7 0 -14 q6 -7 0 -14" fill="none" stroke="#c9b6ff" stroke-width="3" stroke-linecap="round" transform="translate(0 10)"/>
     <path class="steam" style="animation-delay:-1s" d="M60 24 q-6 -7 0 -14 q6 -7 0 -14" fill="none" stroke="#ffb3cf" stroke-width="3" stroke-linecap="round" transform="translate(0 10)"/>
@@ -491,10 +633,18 @@ const MASCOTS = {
 
 const MASCOT_KEYWORDS = [
   ['prawn', /prawn|shrimp|lobster|crab|chingri|jhinga|calamari|squid/i],
+  ['sushi', /sushi|maki|nigiri|onigiri|poke|sashimi/i],
   ['fish', /fish|salmon|tuna|hilsa|ilish|rohu|bhetki|basa|pomfret|cod|mackerel|sardine|maach|machh/i],
   ['brownie', /brownie|fudge|chocolate (cake|bar)|blondie/i],
   ['cookie', /cookie|biscuit|shortbread/i],
-  ['cupcake', /cupcake|muffin|cake|frosting|pastry|tart|pie|dessert|pudding|kheer|halwa|ladoo|laddoo|sweet/i],
+  ['cupcake', /cupcake|muffin/i],
+  ['donut', /donut|doughnut|bagel|churro|gulab jamun/i],
+  ['icecream', /ice ?cream|gelato|kulfi|sundae|popsicle|sorbet|frozen yog/i],
+  ['strawberry', /strawberr|berry|berries|fruit|jam\b|parfait/i],
+  ['cake', /cake|cheesecake|tiramisu|pastry|tart|pie\b|dessert|pudding|kheer|halwa|ladoo|laddoo|sweet|mousse/i],
+  ['croissant', /croissant|bread|bun\b|buns|loaf|brioche|pav\b|scone|bagel/i],
+  ['dumpling', /dumpling|momo|dim ?sum|gyoza|wonton|bao\b|samosa/i],
+  ['burger', /burger|sandwich|slider|hot ?dog|wrap\b|sub\b|panini|toastie/i],
   ['pizza', /pizza|flatbread|garlic bread|focaccia/i],
   ['noodles', /noodle|pasta|ramen|spaghetti|maggi|chow ?mein|hakka|udon|macaroni|penne|soup|pho/i],
   ['chicken', /chicken|mutton|lamb|meat|kebab|kabab|wings|tikka|beef|pork|keema/i],
@@ -512,7 +662,7 @@ function guessMascot(r){
   return 'pot';
 }
 function guessCategory(m){
-  return ({brownie:'Desserts & bakes',cupcake:'Desserts & bakes',cookie:'Desserts & bakes',drink:'Drinks',egg:'Breakfast'})[m] || 'Mains';
+  return ({brownie:'Desserts & bakes',cupcake:'Desserts & bakes',cookie:'Desserts & bakes',cake:'Desserts & bakes',donut:'Desserts & bakes',icecream:'Desserts & bakes',strawberry:'Desserts & bakes',croissant:'Breakfast',drink:'Drinks',egg:'Breakfast',dumpling:'Starters & snacks',burger:'Starters & snacks'})[m] || 'Mains';
 }
 function mascotSVG(key, cls = ''){
   const m = MASCOTS[key] || MASCOTS.pot;
@@ -898,30 +1048,50 @@ function render(){
   else renderHome();
   renderFoot();
 }
-window.addEventListener('hashchange', () => { closeLayer(); render(); window.scrollTo({ top:0 }); });
+window.addEventListener('hashchange', () => {
+  const go = () => { closeLayer(); render(); window.scrollTo({ top:0 }); };
+  if (document.startViewTransition && !matchMedia('(prefers-reduced-motion: reduce)').matches) document.startViewTransition(go); else go();
+});
 
 /* =====================================================================
    Home
    ===================================================================== */
 const hellos = ['what are we cooking today, <b>Anje</b>?', 'hungry, <b>Anje</b>? pick a page ♡', 'your little kitchen diary, <b>Anje</b>'];
 const hello = hellos[Math.floor(Math.random() * hellos.length)];
+let introDone = false;
 function renderHome(){
+  const cs = $('.crew')?.scrollLeft || 0; renderHomeInner(); const c = $('.crew'); if (c) c.scrollLeft = cs;
+}
+function renderHomeInner(){
   const view = $('#view');
   const cats = CATEGORIES.filter(c => recipes.some(r => r.category === c));
-  if (filter !== 'all' && filter !== 'fav' && !cats.includes(filter)) filter = 'all';
-  const list = recipes.filter(r => (filter === 'all' || (filter === 'fav' ? r.fav : r.category === filter)) && matches(r, query)).sort(byNewest);
+  const mFilter = filter.startsWith('m:') ? filter.slice(2) : '';
+  if (filter !== 'all' && filter !== 'fav' && !mFilter && !cats.includes(filter)) filter = 'all';
+  const pass = r => filter === 'all' || (filter === 'fav' ? r.fav : mFilter ? r.mascot === mFilter : r.category === filter);
+  const list = recipes.filter(r => pass(r) && matches(r, query)).sort(byNewest);
+  const favs = recipes.filter(r => r.fav).length;
+  const used = [...new Set(recipes.map(r => r.mascot).filter(k => MASCOTS[k]))];
+  const crew = [...used, ...Object.keys(MASCOTS).filter(k => !used.includes(k))];
+  const intro = !introDone; introDone = true;
   const chip = (val, label) => `<button class="chip" type="button" data-filter="${esc(val)}" aria-pressed="${filter === val}">${label}</button>`;
   const tilts = ['-1.4deg', '1deg', '-.6deg', '1.6deg', '-1deg', '.5deg'];
   view.innerHTML = `
     <section class="hero">
-      <div><h1 class="hello">${hello}</h1><span class="sprinkles" aria-hidden="true"><span>♥</span><span>✦</span><span>♥</span><span>✦</span></span>
-      <p class="count">${recipes.length} ${recipes.length === 1 ? 'recipe' : 'recipes'} in the book${query ? ` · ${list.length} matching “${esc(query)}”` : ''}</p></div>
+      <div class="hero-card">
+        <p class="eyebrow">the recipe book</p>
+        <h1 class="hello">${hello}</h1>
+        <p class="hero-sub"><em>${recipes.length}</em> ${recipes.length === 1 ? 'recipe' : 'recipes'} · <em>${favs}</em> ${favs === 1 ? 'favourite' : 'favourites'}${query ? ` · <em>${list.length}</em> matching “${esc(query)}”` : ''}</p>
+        <div class="crew-wrap">
+          <p class="crew-label">The kitchen crew · tap a friend to see their recipes</p>
+          <div class="crew${intro ? ' intro' : ''}" role="list">${crew.map((k, i) => `<button class="crew-mate${mFilter === k ? ' on' : ''}${used.includes(k) ? '' : ' idle'}" type="button" role="listitem" data-filter="${mFilter === k ? 'all' : 'm:' + k}" aria-pressed="${mFilter === k}" title="${esc(MASCOTS[k].label)}" style="--accent:${MASCOTS[k].accent};--d:${i * 70}ms">${mascotSVG(k)}<span>${esc(MASCOTS[k].label)}</span></button>`).join('')}</div>
+        </div>
+      </div>
     </section>
-    ${recipes.length ? `<div class="chips filters">${chip('all', 'All')}${chip('fav', '♥ Favourites')}${cats.map(c => chip(c, esc(c))).join('')}</div>` : ''}
-    ${list.length ? `<div class="grid">${list.map((r, i) => {
+    ${recipes.length ? `<div class="chips filters">${chip('all', 'All')}${chip('fav', '♥ Favourites')}${cats.map(c => chip(c, esc(c))).join('')}${mFilter ? `<button class="chip" type="button" data-filter="all" aria-pressed="true">${esc(MASCOTS[mFilter].label)} recipes ✕</button>` : ''}</div>` : ''}
+    ${list.length ? `<div class="grid${intro ? ' intro' : ''}">${list.map((r, i) => {
       const peek = (r.sections || []).flatMap(s => s.items).slice(0, 3);
       const ph = (r.photos || [])[0];
-      return `<a class="card" href="#recipe-${esc(r.id)}" style="${styleVars(r)};--tilt:${tilts[i % tilts.length]}">
+      return `<a class="card" href="#recipe-${esc(r.id)}" style="${styleVars(r)};--tilt:${tilts[i % tilts.length]};--i:${i}">
         <span class="tape"></span>
         ${r.fav ? '<span class="card-heart" aria-label="Favourite">♥</span>' : ''}
         <div class="card-art">${mascotSVG(r.mascot)}</div>
@@ -931,9 +1101,9 @@ function renderHome(){
         ${ph ? `<span class="card-photo"><img src="${esc(photoSrc(ph))}" alt="" loading="lazy"></span>` : ''}
       </a>`; }).join('')}</div>`
     : `<div class="empty">${mascotSVG(query ? 'egg' : 'pot')}
-        <h2>${query ? 'Nothing found' : recipes.length ? 'Nothing here yet' : 'Your recipe book is empty'}</h2>
+        <h2>${query ? 'Nothing found' : mFilter ? `No ${esc(MASCOTS[mFilter].label.toLowerCase())} recipes yet` : recipes.length ? 'Nothing here yet' : 'Your recipe book is empty'}</h2>
         <p>${query ? `No recipe mentions “${esc(query)}”. Try an ingredient like garlic or butter.` : 'Snap a photo of a recipe page and it will turn into a pretty digital page here.'}</p>
-        ${query ? '' : '<a class="btn btn-primary" href="#add">Add your first recipe</a>'}</div>`}`;
+        ${query ? '' : `<a class="btn btn-primary" href="#add">${mFilter || recipes.length ? 'Add a recipe' : 'Add your first recipe'}</a>`}</div>`}`;
 }
 
 /* =====================================================================
@@ -1253,7 +1423,8 @@ function onFormAction(a, el){
    ===================================================================== */
 function renderFoot(){
   const local = backend.mode === 'local';
-  $('#foot').innerHTML = `<div class="love">made with love by Anje ♡</div>
+  $('#foot').innerHTML = `<div class="parade" aria-hidden="true">${['cupcake', 'prawn', 'strawberry', 'brownie', 'dumpling', 'icecream', 'fish'].map(k => mascotSVG(k)).join('')}</div>
+    <div class="love">made with love by Anje ♡</div>
     <div>${local ? 'Recipes are saved in this browser on this device.' : 'Recipes are saved to this page, so they show up on any device.'}</div>
     ${local && !window.claude ? `<div class="row"><button class="btn btn-soft" type="button" id="bk-out">Back up recipes</button>
       <label class="btn btn-soft" for="bk-in">Restore a backup</label><input id="bk-in" type="file" accept="application/json,.json" hidden></div>` : ''}`;
