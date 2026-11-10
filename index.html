@@ -9,6 +9,8 @@
 <meta name="apple-mobile-web-app-title" content="Anje's Recipes">
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8D%B0%3C/text%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
 </head>
 <body>
 <title>Anje's Recipes</title>
@@ -1970,6 +1972,13 @@ async function boot(){
   }
 }
 boot();
+
+/* offline: keep a copy of the site on the device (not on the Claude page) */
+if ('serviceWorker' in navigator && !window.claude && /^https?:$/.test(location.protocol)) {
+  addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+}
+addEventListener('offline', () => toast('You\'re offline. Everything still works ♡'));
+addEventListener('online', () => toast('Back online'));
 })();
 </script>
 
