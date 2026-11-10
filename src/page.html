@@ -339,6 +339,30 @@ body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
 @keyframes flicker{to{transform:scale(.86,1.1) rotate(5deg)}}
 ::view-transition-old(root),::view-transition-new(root){animation-duration:.28s}
 @media (prefers-reduced-motion: reduce){.crew.intro .crew-mate,.grid.intro .card{animation:none}}
+
+/* ---------- crop & sync ---------- */
+.thumb-edit{position:absolute;left:5px;right:5px;bottom:5px;border:0;border-radius:999px;padding:5px 4px;font-size:.72rem;font-weight:700;cursor:pointer;background:rgba(255,255,255,.92);color:#4b3242;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+.crop-tip{margin-top:10px}
+.crop-card{max-width:760px;text-align:left}
+.crop-card h2,.crop-card>p{text-align:center}
+.crop-stage{height:min(58vh,540px);background:var(--paper-2);border-radius:16px;overflow:hidden}
+.crop-stage img{display:block;max-width:100%}
+.crop-tools{justify-content:center;margin-top:12px}
+.crop-card .row:last-child{justify-content:flex-end}
+.sync-btn{position:relative}
+.sync-btn i{position:absolute;right:6px;bottom:7px;width:9px;height:9px;border-radius:50%;border:2px solid var(--paper);background:#b9a7b2}
+.sync-btn[data-state="ok"] i{background:#4fc79a}
+.sync-btn[data-state="syncing"] i{background:#ffc93c;animation:pulse 1s ease-in-out infinite alternate}
+.sync-btn[data-state="error"] i{background:#e5536b}
+.sync-btn[data-state="offline"] i{background:#9aa6b5}
+@keyframes pulse{to{transform:scale(1.35)}}
+.sync-form{display:grid;gap:6px;text-align:left;margin-top:6px}
+.sync-form label{font-weight:700;font-size:.82rem;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-soft)}
+.sync-form input{width:100%;border:2px solid var(--rule);border-radius:14px;padding:10px 14px;background:var(--paper-2);outline:none}
+.sync-form input:focus{border-color:var(--pink)}
+.sync-form .row{justify-content:flex-end}
+#sync-status{font-family:var(--font-serif);font-style:italic}
+.foot .linkish{font-size:inherit}
 @media (prefers-reduced-motion: reduce){
   .mascot *:not(.blink){animation:none!important}
   .card,.btn,.polaroid{transition:none}
@@ -359,6 +383,7 @@ body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
         <div class="results" id="results" role="listbox" hidden></div>
       </div>
       <div class="top-actions">
+        <button class="icon-btn btn sync-btn" id="sync-btn" type="button" hidden aria-label="Sign in to sync"></button>
         <button class="icon-btn btn" id="theme-btn" type="button" aria-label="Switch to dark mode" title="Light / dark"></button>
         <a class="btn btn-primary" href="#add" id="add-btn">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
@@ -729,7 +754,11 @@ async function smallDataURL(blob){
   for (const [m, q] of [[1000, .7], [820, .6], [660, .55]]) { const d = await blobToDataURL(await compress(blob, m, q)); if (d.length < 85000) return d; }
   return blobToDataURL(await compress(blob, 520, .5));
 }
-const photoSrc = p => p.asset ? '/_blob/' + p.asset : (p.data || p.src || '');
+/* Free cloud sync: paste your Supabase project's URL and publishable (anon) key here.
+   Both are safe to be public; the database's sign-in rules keep the recipes private. */
+const CLOUD = { url: '', key: '' };
+const cloudPhotoURL = path => CLOUD.url.replace(/\/$/, '') + '/storage/v1/object/public/photos/' + path.split('/').map(encodeURIComponent).join('/');
+const photoSrc = p => p.asset ? '/_blob/' + p.asset : p.cloud ? cloudPhotoURL(p.cloud) : (p.data || p.src || '');
 
 /* =====================================================================
    Storage: this browser (IndexedDB) or the Claude page (shared db)
@@ -749,7 +778,7 @@ function idb(db, name, mode, fn){
   });
 }
 async function makeLocal(){
-  let db = null; let mem = clone(SEEDS);
+  let db = null; let mem = clone(SEEDS); let memTomb = {};
   try { db = await idbOpen(); } catch { db = null; }
   return {
     mode:'local',
@@ -764,9 +793,14 @@ async function makeLocal(){
       return all;
     },
     async save(r){ if (db) await idb(db, 'recipes', 'readwrite', s => s.put(clone(r))); else mem = mem.filter(x => x.id !== r.id).concat([clone(r)]); },
-    async remove(r){ if (db) await idb(db, 'recipes', 'readwrite', s => s.delete(r.id)); else mem = mem.filter(x => x.id !== r.id); },
+    async remove(r, fromSync){
+      if (db) await idb(db, 'recipes', 'readwrite', s => s.delete(r.id)); else mem = mem.filter(x => x.id !== r.id);
+      if (!fromSync) { const t = await this.getTombstones(); t[r.id] = Date.now(); await this.setTombstones(t); }
+    },
+    async getTombstones(){ if (!db) return Object.assign({}, memTomb); return (await idb(db, 'meta', 'readonly', s => s.get('tombstones'))) || {}; },
+    async setTombstones(t){ if (!db) { memTomb = t; return; } await idb(db, 'meta', 'readwrite', s => s.put(t, 'tombstones')); },
     async storePhoto(blob){ return { data: await blobToDataURL(await compress(blob, 1600, .82)) }; },
-    async dropPhoto(){},
+    async dropPhoto(p){ if (p && p.cloud && Sync.user) { try { await Sync.client.storage.from('photos').remove([p.cloud]); } catch {} } },
   };
 }
 function makeCloud(db, assets){
@@ -971,6 +1005,7 @@ $('#theme-btn').addEventListener('click', () => {
   document.documentElement.dataset.theme = next; store.set('anje-theme', next); paintThemeBtn();
 });
 matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', paintThemeBtn);
+$('#sync-btn').addEventListener('click', () => openSyncModal());
 paintThemeBtn();
 $('#brand-art').innerHTML = mascotSVG('pot');
 $('#boot-art').innerHTML = mascotSVG('pot');
@@ -980,16 +1015,50 @@ $('#boot-art').innerHTML = mascotSVG('pot');
    ===================================================================== */
 const hay = r => [r.title, r.category, ...(r.sections || []).flatMap(s => [s.name, ...s.items]), ...(r.steps || []), r.notes].join(' \n ').toLowerCase();
 const terms = q => q.toLowerCase().split(/\s+/).filter(Boolean);
-const matches = (r, q) => { const t = terms(q); if (!t.length) return true; const h = hay(r); return t.every(w => h.includes(w)); };
+// typo-tolerant matching: "garlik" still finds garlic, "brownis" finds brownies
+function editDist(a, b, max){
+  if (Math.abs(a.length - b.length) > max) return max + 1;
+  let prev = Array.from({ length: b.length + 1 }, (_, j) => j);
+  for (let i = 1; i <= a.length; i++) {
+    const cur = [i]; let best = i;
+    for (let j = 1; j <= b.length; j++) {
+      cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+      if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) cur[j] = Math.min(cur[j], prev[j - 2] + 1);
+      if (cur[j] < best) best = cur[j];
+    }
+    if (best > max) return max + 1;
+    prev = cur;
+  }
+  return prev[b.length];
+}
+const allowed = w => w.length >= 8 ? 2 : w.length >= 4 ? 1 : 0;
+const wordsOf = text => String(text || '').toLowerCase().match(/[a-zÀ-ɏ]+/g) || [];
+// the word in `text` a search term matches (exactly, as a prefix, or within a typo or two)
+function fuzzyWord(term, text){
+  const lower = String(text || '').toLowerCase();
+  if (lower.includes(term)) return term;
+  const max = allowed(term); if (!max) return null;
+  for (const w of new Set(wordsOf(text))) {
+    if (w.length < 3) continue;
+    if (editDist(term, w, max) <= max) return w;
+    // half-typed words with a slip: "chocol" / "chocla" -> chocolate
+    if (term.length >= 5 && w.length > term.length && editDist(term, w.slice(0, term.length), 1) <= 1) return w;
+  }
+  return null;
+}
+const matches = (r, q) => { const t = terms(q); if (!t.length) return true; const h = hay(r); return t.every(w => fuzzyWord(w, h)); };
 function hi(text, q){
   let out = esc(text);
-  for (const w of terms(q)) { const re = new RegExp('(' + w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'ig'); out = out.replace(re, '<mark>$1</mark>'); }
+  for (const t of terms(q)) {
+    const w = fuzzyWord(t, text); if (!w) continue;
+    const re = new RegExp('(' + esc(w).replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'ig'); out = out.replace(re, '<mark>$1</mark>');
+  }
   return out;
 }
 function snippet(r, q){
   const t = terms(q);
   const pool = [...(r.sections || []).flatMap(s => s.items), ...(r.steps || [])];
-  const hit = t.length ? pool.find(x => t.some(w => x.toLowerCase().includes(w))) : null;
+  const hit = t.length ? pool.find(x => t.some(w => fuzzyWord(w, x))) : null;
   const s = hit || pool.slice(0, 3).join(' · ');
   return s.length > 90 ? s.slice(0, 88) + '…' : s;
 }
@@ -1193,6 +1262,7 @@ async function saveRecipe(r){
   const i = recipes.findIndex(x => x.id === r.id);
   if (i >= 0) recipes[i] = r; else recipes.push(r);
   render();
+  Sync.soon();
 }
 function saveError(err){
   const c = err && err.code;
@@ -1215,6 +1285,7 @@ function confirmDelete(r){
     try {
       await backend.remove(r);
       recipes = recipes.filter(x => x.id !== r.id);
+      Sync.soon();
       closeLayer(); toast('Recipe deleted');
       if (location.hash) location.hash = ''; else render();
     } catch (err) { closeLayer(); toast(saveError(err)); }
@@ -1256,7 +1327,8 @@ function renderPick(){
         <span>or tap to choose · JPG, PNG or screenshots</span>
       </label>
       <input id="file-in" type="file" accept="image/*" multiple hidden>
-      <div class="thumbs">${draft.urls.map((u, i) => `<div class="thumb"><img src="${u}" alt="Page ${i + 1}"><button type="button" data-act="unpick" data-i="${i}" aria-label="Remove page ${i + 1}">×</button></div>`).join('')}</div>
+      <div class="thumbs">${draft.urls.map((u, i) => `<div class="thumb"><img src="${u}" alt="Page ${i + 1}"><button type="button" data-act="unpick" data-i="${i}" aria-label="Remove page ${i + 1}">×</button><button type="button" class="thumb-edit" data-act="crop" data-i="${i}">✂ Crop &amp; rotate</button></div>`).join('')}</div>
+      ${draft.files.length ? '<p class="hint crop-tip">Tip: crop away stickers, fingers and the facing page first. The text reader does much better on just the recipe.</p>' : ''}
       <div class="row">
         <button class="btn btn-primary" type="button" data-act="read" ${draft.files.length ? '' : 'disabled'}>✨ Read my recipe</button>
         <button class="linkish" type="button" data-act="manual">or type it in yourself</button>
@@ -1352,7 +1424,7 @@ function renderForm(){
         <div class="field full"><span class="lbl">Photos of the page</span>
           <div class="thumbs" style="margin-top:0">
             ${keepPhotos.map((p, i) => `<div class="thumb"><img src="${esc(photoSrc(p))}" alt="Saved page ${i + 1}"><button type="button" data-act="drop-saved" data-i="${i}" aria-label="Remove photo">×</button></div>`).join('')}
-            ${draft.urls.map((u, i) => `<div class="thumb"><img src="${u}" alt="New page ${i + 1}"><button type="button" data-act="drop-new" data-i="${i}" aria-label="Remove photo">×</button></div>`).join('')}
+            ${draft.urls.map((u, i) => `<div class="thumb"><img src="${u}" alt="New page ${i + 1}"><button type="button" data-act="drop-new" data-i="${i}" aria-label="Remove photo">×</button><button type="button" class="thumb-edit" data-act="crop-new" data-i="${i}">✂ Crop</button></div>`).join('')}
             <label class="thumb drop" for="more-in" style="padding:6px;border-width:2px" title="Add photo"><strong style="font-size:2rem">+</strong><span>photo</span></label>
           </div>
           <input id="more-in" type="file" accept="image/*" multiple hidden>
@@ -1402,6 +1474,8 @@ async function submitForm(){
 function onFormAction(a, el){
   if (a === 'unpick') { const i = +el.dataset.i; URL.revokeObjectURL(draft.urls[i]); draft.files.splice(i, 1); draft.urls.splice(i, 1); renderPick(); }
   else if (a === 'read') { if (draft.files.length) startReading(); }
+  else if (a === 'crop') openCropper(+el.dataset.i, renderPick);
+  else if (a === 'crop-new') { syncForm(); openCropper(+el.dataset.i, renderForm); }
   else if (a === 'manual') {
     const base = normalize({}); base.mascot = 'pot'; base.category = 'Mains';
     draft.stage = 'form'; draft.warn = ''; draft.rawText = '';
@@ -1419,15 +1493,244 @@ function onFormAction(a, el){
 }
 
 /* =====================================================================
+   Crop & rotate (Cropper.js, loaded only when needed)
+   ===================================================================== */
+const loaded = {};
+function loadScript(src){
+  if (!loaded[src]) loaded[src] = new Promise((res, rej) => {
+    const el = document.createElement('script'); el.src = src;
+    el.onload = () => res(); el.onerror = () => { delete loaded[src]; rej(new Error('load')); };
+    document.head.appendChild(el);
+  });
+  return loaded[src];
+}
+function loadStyle(href){
+  if (!loaded[href]) loaded[href] = new Promise((res, rej) => {
+    const el = document.createElement('link'); el.rel = 'stylesheet'; el.href = href;
+    el.onload = () => res(); el.onerror = () => { delete loaded[href]; rej(new Error('load')); };
+    document.head.appendChild(el);
+  });
+  return loaded[href];
+}
+async function openCropper(i, after){
+  if (!draft || !draft.urls[i]) return;
+  openLayer(`<div class="modal" role="dialog" aria-modal="true" aria-labelledby="crop-h"><div class="modal-card crop-card">
+    <h2 id="crop-h">Crop &amp; rotate</h2>
+    <p>Drag the corners so only the recipe is inside the box.</p>
+    <div class="crop-stage"><img id="crop-img" src="${draft.urls[i]}" alt="Recipe photo to crop"></div>
+    <div class="row crop-tools">
+      <button class="btn btn-soft" type="button" id="rot-l" aria-label="Rotate left">⟲ Left</button>
+      <button class="btn btn-soft" type="button" id="rot-r" aria-label="Rotate right">⟳ Right</button>
+      <button class="btn btn-soft" type="button" id="crop-reset">Reset</button>
+    </div>
+    <div class="row"><button class="btn btn-soft" type="button" data-close>Cancel</button><button class="btn btn-primary" type="button" id="crop-ok" disabled>Use this</button></div>
+  </div></div>`);
+  try {
+    await Promise.all([loadStyle('https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css'), loadScript('https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js')]);
+  } catch { closeLayer(); toast('Couldn\'t load the crop tool. Check the internet connection.'); return; }
+  const img = $('#crop-img'); if (!img) return;
+  const cropper = new window.Cropper(img, { viewMode:1, autoCropArea:1, background:false, responsive:true, toggleDragModeOnDblclick:false,
+    ready(){ const ok = $('#crop-ok'); if (ok) ok.disabled = false; } });
+  // turn the photo itself, then reload it so the crop box always covers the whole page
+  let current = draft.files[i], tempURL = null;
+  const turn = async deg => {
+    const im = await loadImage(current);
+    const c = document.createElement('canvas'); c.width = im.naturalHeight; c.height = im.naturalWidth;
+    const g = c.getContext('2d'); g.translate(c.width / 2, c.height / 2); g.rotate(deg * Math.PI / 180); g.drawImage(im, -im.naturalWidth / 2, -im.naturalHeight / 2);
+    current = await new Promise(r => c.toBlob(r, 'image/jpeg', .94));
+    if (tempURL) URL.revokeObjectURL(tempURL);
+    tempURL = URL.createObjectURL(current); cropper.replace(tempURL);
+  };
+  $('#rot-l').onclick = () => turn(-90);
+  $('#rot-r').onclick = () => turn(90);
+  $('#crop-reset').onclick = () => { current = draft.files[i]; cropper.replace(draft.urls[i]); };
+  $('#crop-ok').onclick = async () => {
+    $('#crop-ok').disabled = true; $('#crop-ok').textContent = 'Saving…';
+    const canvas = cropper.getCroppedCanvas({ maxWidth:2600, maxHeight:2600, fillColor:'#fff', imageSmoothingQuality:'high' });
+    const blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', .92));
+    cropper.destroy(); if (tempURL) URL.revokeObjectURL(tempURL);
+    if (blob && draft && draft.urls[i]) {
+      URL.revokeObjectURL(draft.urls[i]);
+      draft.files[i] = new File([blob], 'page-' + (i + 1) + '.jpg', { type:'image/jpeg' });
+      draft.urls[i] = URL.createObjectURL(blob);
+    }
+    closeLayer(); after(); toast('Photo updated');
+  };
+}
+
+/* =====================================================================
+   Free cloud sync (Supabase). Recipes stay in this browser first,
+   then sync both ways whenever she's signed in and online.
+   ===================================================================== */
+const Sync = {
+  client: null, user: null, state: 'off', last: 0, busy: false, again: false, timer: null,
+  enabled(){ return !!(CLOUD.url && CLOUD.key) && backend && backend.mode === 'local' && !window.claude; },
+  async init(){
+    if (!this.enabled()) return;
+    $('#sync-btn').hidden = false; paintSync();
+    try { await loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.js'); }
+    catch { this.state = 'offline'; paintSync(); return; }
+    this.client = window.supabase.createClient(CLOUD.url, CLOUD.key, { auth:{ persistSession:true, autoRefreshToken:true, storageKey:'anje-sync-auth' } });
+    const { data } = await this.client.auth.getSession();
+    this.user = data.session?.user || null;
+    this.client.auth.onAuthStateChange((_e, session) => { this.user = session?.user || null; if (!this.user) this.state = 'off'; paintSync(); });
+    paintSync(); renderFoot();
+    if (this.user) this.run();
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) this.run(); });
+    window.addEventListener('online', () => this.run());
+    setInterval(() => { if (!document.hidden) this.run(); }, 90000);
+  },
+  soon(){ clearTimeout(this.timer); this.timer = setTimeout(() => this.run(), 600); },
+  async signIn(email, password){
+    const { data, error } = await this.client.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+    this.user = data.user; paintSync(); renderFoot();
+    await this.run();
+  },
+  async signOut(){ try { await this.client.auth.signOut(); } catch {} this.user = null; this.state = 'off'; paintSync(); renderFoot(); },
+  async run(){
+    if (!this.client || !this.user) return;
+    if (this.busy) { this.again = true; return; }
+    this.busy = true; this.state = 'syncing'; paintSync();
+    try { await syncOnce(); this.state = 'ok'; this.last = Date.now(); }
+    catch (e) { console.warn('sync', e); this.state = navigator.onLine ? 'error' : 'offline'; }
+    finally { this.busy = false; paintSync(); if (this.again) { this.again = false; this.run(); } }
+  },
+};
+const stamp = r => r.updatedAt || r.createdAt || 0;
+async function pushRecipe(l){
+  const sb = Sync.client; let rec = l, moved = false; const photos = [];
+  for (const p of l.photos || []) {
+    if (p.data) {
+      const blob = await (await fetch(p.data)).blob();
+      const path = l.id + '/' + uid() + '.jpg';
+      const { error } = await sb.storage.from('photos').upload(path, blob, { contentType:'image/jpeg', upsert:false });
+      if (error) throw error;
+      photos.push({ cloud: path }); moved = true;
+    } else photos.push(p);
+  }
+  if (moved) { rec = Object.assign(clone(l), { photos }); await backend.save(rec); }
+  const body = clone(rec); delete body.id;
+  const { error } = await sb.from('recipes').upsert({ id: rec.id, updated: stamp(rec), deleted:false, data: body });
+  if (error) throw error;
+  return moved;
+}
+async function dropCloudPhotos(data){
+  const paths = ((data && data.photos) || []).filter(p => p.cloud).map(p => p.cloud);
+  if (paths.length) { try { await Sync.client.storage.from('photos').remove(paths); } catch {} }
+}
+async function syncOnce(){
+  const sb = Sync.client;
+  const { data: rows, error } = await sb.from('recipes').select('id,updated,deleted,data');
+  if (error) throw error;
+  const remote = new Map(rows.map(r => [r.id, r]));
+  let changed = false;
+
+  // 1. deletions made on this device
+  const tomb = await backend.getTombstones();
+  for (const [id, at] of Object.entries(tomb)) {
+    const r = remote.get(id);
+    if (r && !r.deleted && r.updated <= at) {
+      await dropCloudPhotos(r.data);
+      const { error: e } = await sb.from('recipes').upsert({ id, updated: at, deleted:true, data:null });
+      if (e) throw e;
+      remote.set(id, { id, updated: at, deleted:true, data:null });
+    }
+    delete tomb[id];
+  }
+  await backend.setTombstones(tomb);
+
+  // 2. bring down anything newer from other devices
+  const local = new Map((await backend.load()).map(r => [r.id, r]));
+  for (const r of remote.values()) {
+    const l = local.get(r.id);
+    if (r.deleted) { if (l && stamp(l) <= r.updated) { await backend.remove(l, true); local.delete(r.id); changed = true; } continue; }
+    if (!l || stamp(l) < r.updated) {
+      const rec = Object.assign({ sections:[], steps:[], photos:[] }, r.data, { id: r.id, updatedAt: r.updated });
+      await backend.save(rec); local.set(r.id, rec); changed = true;
+    }
+  }
+  // 3. send up anything newer from this device
+  for (const l of local.values()) {
+    const r = remote.get(l.id);
+    if (!r || stamp(l) > r.updated) { if (await pushRecipe(l)) changed = true; }
+  }
+  if (changed) {
+    recipes = await backend.load();
+    const rt = route().name;
+    if (rt === 'add' || rt === 'edit') renderFoot(); else { render(); renderResults(); }
+  }
+}
+
+const ICON_CLOUD = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 18h10.5a4 4 0 0 0 .6-7.96A6 6 0 0 0 6.3 9.1 4.5 4.5 0 0 0 7 18Z"/></svg>';
+function paintSync(){
+  const b = $('#sync-btn'); if (!b || b.hidden) return;
+  const st = Sync.user ? Sync.state : 'off';
+  const label = { off:'Sign in to sync', syncing:'Syncing…', ok:'Synced', error:'Sync problem, tap for details', offline:'Offline, will sync later' }[st] || 'Sync';
+  b.dataset.state = st; b.innerHTML = ICON_CLOUD + '<i aria-hidden="true"></i>';
+  b.setAttribute('aria-label', label); b.title = label;
+  const m = $('#sync-status'); if (m) m.textContent = syncLine();
+}
+function syncLine(){
+  if (!Sync.user) return 'Not signed in. Recipes are only on this device.';
+  if (Sync.state === 'syncing') return 'Syncing now…';
+  if (Sync.state === 'offline') return 'Offline. Changes will sync when you\'re back online.';
+  if (Sync.state === 'error') return 'Couldn\'t sync just now. It will try again automatically.';
+  if (!Sync.last) return 'Signed in.';
+  const mins = Math.round((Date.now() - Sync.last) / 60000);
+  return 'Synced ' + (mins < 1 ? 'just now' : mins === 1 ? 'a minute ago' : mins + ' minutes ago') + '.';
+}
+function openSyncModal(){
+  if (Sync.user) {
+    openLayer(`<div class="modal" data-close role="dialog" aria-modal="true" aria-labelledby="sync-h"><div class="modal-card">
+      ${mascotSVG('strawberry')}
+      <h2 id="sync-h">Recipes are syncing</h2>
+      <p>Signed in as <b>${esc(Sync.user.email || '')}</b>. Recipes show up on every device she signs in on.</p>
+      <p id="sync-status">${esc(syncLine())}</p>
+      <div class="row"><button class="btn btn-soft" type="button" id="sync-out">Sign out</button><button class="btn btn-primary" type="button" id="sync-now">Sync now</button></div>
+    </div></div>`);
+    $('#sync-now').onclick = () => Sync.run();
+    $('#sync-out').onclick = async () => { await Sync.signOut(); closeLayer(); toast('Signed out. Recipes stay on this device.'); };
+    return;
+  }
+  openLayer(`<div class="modal" data-close role="dialog" aria-modal="true" aria-labelledby="sync-h"><div class="modal-card">
+    ${mascotSVG('icecream')}
+    <h2 id="sync-h">Sync your recipe book</h2>
+    <p>Sign in to keep the same recipes on her phone, laptop and anywhere else.</p>
+    <form id="sync-form" class="sync-form" novalidate>
+      <label for="sync-email">Email</label><input id="sync-email" type="email" autocomplete="username" required>
+      <label for="sync-pw">Password</label><input id="sync-pw" type="password" autocomplete="current-password" required>
+      <p class="warn" id="sync-err" hidden></p>
+      <div class="row"><button class="btn btn-soft" type="button" data-close>Not now</button><button class="btn btn-primary" type="submit" id="sync-go">Sign in</button></div>
+    </form>
+  </div></div>`);
+  $('#sync-email').focus();
+  $('#sync-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const err = $('#sync-err'), go = $('#sync-go'); err.hidden = true;
+    const email = $('#sync-email').value.trim(), pw = $('#sync-pw').value;
+    if (!email || !pw) { err.textContent = 'Type the email and password first.'; err.hidden = false; return; }
+    go.disabled = true; go.textContent = 'Signing in…';
+    try { await Sync.signIn(email, pw); closeLayer(); toast('Signed in. Syncing your recipes ☁'); }
+    catch (ex) {
+      go.disabled = false; go.textContent = 'Sign in';
+      err.textContent = /invalid/i.test(ex?.message || '') ? 'That email or password isn\'t right.' : navigator.onLine ? 'Couldn\'t sign in right now. Try again in a moment.' : 'You\'re offline. Connect to the internet and try again.';
+      err.hidden = false;
+    }
+  });
+}
+
+/* =====================================================================
    Footer (with backup for the browser-only version)
    ===================================================================== */
 function renderFoot(){
   const local = backend.mode === 'local';
   $('#foot').innerHTML = `<div class="parade" aria-hidden="true">${['cupcake', 'prawn', 'strawberry', 'brownie', 'dumpling', 'icecream', 'fish'].map(k => mascotSVG(k)).join('')}</div>
     <div class="love">made with love by Anje ♡</div>
-    <div>${local ? 'Recipes are saved in this browser on this device.' : 'Recipes are saved to this page, so they show up on any device.'}</div>
+    <div>${!local ? 'Recipes are saved to this page, so they show up on any device.' : Sync.user ? 'Recipes sync to the cloud, so they show up on every device she signs in on.' : Sync.enabled() ? 'Recipes are saved in this browser. <button class="linkish" type="button" id="foot-sync">Sign in to sync</button> to see them on every device.' : 'Recipes are saved in this browser on this device.'}</div>
     ${local && !window.claude ? `<div class="row"><button class="btn btn-soft" type="button" id="bk-out">Back up recipes</button>
       <label class="btn btn-soft" for="bk-in">Restore a backup</label><input id="bk-in" type="file" accept="application/json,.json" hidden></div>` : ''}`;
+  $('#foot-sync')?.addEventListener('click', () => openSyncModal());
   $('#bk-out')?.addEventListener('click', () => {
     const blob = new Blob([JSON.stringify({ app:'anjes-recipes', version:1, recipes }, null, 1)], { type:'application/json' });
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
@@ -1473,6 +1776,7 @@ async function boot(){
     backend = await makeLocal();
     recipes = await backend.load().catch(() => clone(SEEDS));
     ready = true; render();
+    Sync.init();
   }
 }
 boot();
