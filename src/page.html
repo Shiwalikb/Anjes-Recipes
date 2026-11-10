@@ -290,8 +290,8 @@ body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
 /* ---------- premium layer ---------- */
 :root{--rose:#c98a8f;--rose-2:#f1c7b8;--gold:linear-gradient(100deg,#c9897a,#f3cdb8 40%,#d99a86 60%,#f6dccb);--grain:.55;
   --shadow:0 1px 2px rgba(150,70,100,.08),0 6px 14px -8px rgba(190,80,125,.25),0 26px 50px -28px rgba(190,80,125,.55)}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--grain:.25;--shadow:0 1px 2px rgba(0,0,0,.3),0 26px 50px -24px rgba(0,0,0,.8)}}
-:root[data-theme="dark"]{--grain:.25;--shadow:0 1px 2px rgba(0,0,0,.3),0 26px 50px -24px rgba(0,0,0,.8)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--puff-hi:rgba(255,255,255,.07);--puff-lo:rgba(0,0,0,.35);--grain:.25;--shadow:0 1px 2px rgba(0,0,0,.3),0 26px 50px -24px rgba(0,0,0,.8)}}
+:root[data-theme="dark"]{--puff-hi:rgba(255,255,255,.07);--puff-lo:rgba(0,0,0,.35);--grain:.25;--shadow:0 1px 2px rgba(0,0,0,.3),0 26px 50px -24px rgba(0,0,0,.8)}
 ::selection{background:var(--pink);color:#3a1326}
 .card::after,.page::after,.hero-card::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .28 0 0 0 0 .36 0 0 0 .22 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");opacity:var(--grain);mix-blend-mode:multiply}
 .topbar{background:color-mix(in srgb,var(--bg) 72%,transparent);backdrop-filter:blur(16px) saturate(1.4);-webkit-backdrop-filter:blur(16px) saturate(1.4)}
@@ -363,6 +363,62 @@ body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
 .sync-form .row{justify-content:flex-end}
 #sync-status{font-family:var(--font-serif);font-style:italic}
 .foot .linkish{font-size:inherit}
+
+/* ---------- 3D & interactive ---------- */
+:root{--puff-hi:rgba(255,255,255,.75);--puff-lo:rgba(170,90,125,.14)}
+/* 1. tilting cards */
+.card{transform:perspective(900px) rotateX(var(--rx,var(--orx,0deg))) rotateY(var(--ry,var(--ory,0deg))) rotate(var(--tilt,0deg));transform-style:preserve-3d;transition:transform .45s cubic-bezier(.2,.8,.2,1),box-shadow .3s}
+.card.tilting{transition:transform .09s linear,box-shadow .3s}
+.card:hover,.card:focus-visible{transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) translateY(-8px) scale(1.02)}
+.card::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:3;opacity:0;transition:opacity .35s;
+  background:radial-gradient(circle at var(--gx,50%) var(--gy,0%),rgba(255,255,255,.65),rgba(255,255,255,0) 55%);mix-blend-mode:soft-light}
+.card.tilting::before,.card:hover::before{opacity:1}
+.card-art{transform:translateZ(36px)}
+.card-title{transform:translateZ(18px)}
+.card-photo{transform:rotate(7deg) translateZ(26px)}
+/* 2. depth layers */
+body{background-position:0 calc(var(--sy,0) * -.22px)}
+body::after{inset:-30vh 0;transform:translateY(max(-25vh,calc(var(--sy,0) * -.08px)))}
+.page .tape{translate:0 calc(min(var(--sy,0),600) * -.05px)}
+.r-mascot{translate:0 calc(min(var(--sy,0),500) * .12px)}
+.note{translate:0 calc(min(var(--sy,0),1400) * -.025px)}
+.hero-card .crew{translate:0 calc(min(var(--sy,0),400) * -.04px)}
+/* 3. eyes that follow */
+.mascot .look{transform:translate(var(--lx,0px),var(--ly,0px));transition:transform .2s ease-out}
+/* 4. squishy sticker buttons */
+.btn,.chip,.icon-btn,.pick,.crew-mate,.thumb-edit{transition:transform .45s cubic-bezier(.3,1.8,.5,1),box-shadow .2s,background .2s}
+.btn-soft,.chip,.icon-btn,.pick{box-shadow:inset 0 2px 0 var(--puff-hi),inset 0 -3px 0 var(--puff-lo),0 4px 10px -6px rgba(150,70,100,.35)}
+.btn-primary{box-shadow:inset 0 2px 0 rgba(255,255,255,.4),inset 0 -4px 0 rgba(90,10,50,.22),0 8px 20px -8px color-mix(in srgb,var(--pink-strong) 70%,transparent)}
+.btn-danger{box-shadow:inset 0 2px 0 var(--puff-hi),inset 0 -3px 0 var(--puff-lo)}
+.btn:active,.chip:active,.icon-btn:active,.pick:active,.crew-mate:active,.thumb-edit:active{transform:scale(.92,.86);transition-duration:.07s}
+/* 5. tricks */
+.r-mascot .mascot,.parade .mascot,.crew-mate .mascot,.brand-art .mascot,.empty .mascot,.reading .mascot,.modal-card .mascot,.drop .mascot{cursor:pointer}
+.mascot.trick-flip{animation:t-flip 1s cubic-bezier(.3,.7,.4,1)}
+.mascot.trick-spin{animation:t-spin .9s cubic-bezier(.4,1.6,.5,1)}
+.mascot.trick-jump{animation:t-jump .9s ease}
+.mascot.trick-squish{animation:t-squish .8s ease}
+.mascot.trick-wobble,.mascot.trick-bubbles{animation:t-wobble .9s ease}
+.mascot.trick-shake{animation:t-shake .6s ease}
+.mascot.trick-roll{animation:t-roll 1s ease}
+.mascot.trick-steam,.mascot.trick-candle{animation:t-jump .9s ease}
+.mascot.trick-bubbles .bubble,.mascot.trick-steam .steam{animation-duration:.7s!important}
+.mascot.trick-candle .flicker{animation:t-candle 1.4s ease both!important}
+@keyframes t-flip{30%{transform:translateY(-26px) rotate(-180deg)}60%{transform:translateY(-14px) rotate(-360deg)}80%{transform:translateY(0) rotate(-360deg) scale(1.12,.86)}100%{transform:rotate(-360deg)}}
+@keyframes t-spin{to{transform:rotate(360deg)}}
+@keyframes t-jump{20%{transform:scale(1.12,.84)}45%{transform:translateY(-26px) scale(.9,1.12)}70%{transform:translateY(0) scale(1.12,.88)}85%{transform:scale(.97,1.03)}}
+@keyframes t-squish{20%{transform:scale(1.28,.68)}45%{transform:scale(.84,1.2)}65%{transform:scale(1.1,.92)}82%{transform:scale(.97,1.03)}}
+@keyframes t-wobble{15%{transform:rotate(-16deg)}35%{transform:rotate(13deg)}55%{transform:rotate(-8deg)}75%{transform:rotate(4deg)}}
+@keyframes t-shake{20%,60%{transform:translateX(-7px) rotate(-4deg)}40%,80%{transform:translateX(7px) rotate(4deg)}}
+@keyframes t-roll{40%{transform:translateX(22px) rotate(140deg)}80%{transform:translateX(-4px) rotate(-12deg)}}
+@keyframes t-candle{0%{transform:scale(1);opacity:1}20%{transform:scale(.3,0);opacity:0}70%{transform:scale(0);opacity:0}100%{transform:scale(1);opacity:1}}
+/* 6. drag & fling */
+.crew-mate .mascot,.parade .mascot{touch-action:pan-x;user-select:none;-webkit-user-select:none;-webkit-user-drag:none}
+.crew{user-select:none;-webkit-user-select:none}
+.mascot.flying{position:fixed;z-index:90;pointer-events:none;margin:0;filter:drop-shadow(0 14px 14px rgba(90,30,60,.3));will-change:transform}
+@media (prefers-reduced-motion: reduce){
+  .card,.card:hover{transform:rotate(var(--tilt,0deg))}
+  body,body::after,.page .tape,.r-mascot,.note,.hero-card .crew{translate:none;background-position:0 0}
+}
 @media (prefers-reduced-motion: reduce){
   .mascot *:not(.blink){animation:none!important}
   .card,.btn,.polaroid{transition:none}
@@ -420,7 +476,7 @@ const store = {
 const OL = '#5a3446';
 const S = `stroke="${OL}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"`;
 const eye = (x, y, r) => `<ellipse cx="${x}" cy="${y}" rx="${r}" ry="${(r*1.18).toFixed(2)}" fill="#2d1b26"/><circle cx="${(x + r*.38).toFixed(2)}" cy="${(y - r*.48).toFixed(2)}" r="${(r*.36).toFixed(2)}" fill="#fff"/>`;
-const eyes = (x1, y1, x2, y2, r = 3.6) => `<g class="blink">${eye(x1,y1,r)}${eye(x2,y2,r)}</g>`;
+const eyes = (x1, y1, x2, y2, r = 3.6) => `<g class="look"><g class="blink">${eye(x1,y1,r)}${eye(x2,y2,r)}</g></g>`;
 const blush = (x1, x2, y) => `<ellipse cx="${x1}" cy="${y}" rx="5" ry="3" fill="#ff6f9f" opacity=".45"/><ellipse cx="${x2}" cy="${y}" rx="5" ry="3" fill="#ff6f9f" opacity=".45"/>`;
 const smile = (x, y, w = 8) => `<path d="M${x - w/2} ${y} q${w/2} ${w*.65} ${w} 0" fill="none" ${S}/>`;
 const star = (x, y, s, fill, d) => `<path class="twinkle" style="animation-delay:${d}s" d="M${x} ${y-s} L${x+s*.3} ${y-s*.3} L${x+s} ${y} L${x+s*.3} ${y+s*.3} L${x} ${y+s} L${x-s*.3} ${y+s*.3} L${x-s} ${y} L${x-s*.3} ${y-s*.3}Z" fill="${fill}"/>`;
@@ -692,7 +748,7 @@ function guessCategory(m){
 function mascotSVG(key, cls = ''){
   const m = MASCOTS[key] || MASCOTS.pot;
   const bd = -(Math.random() * 4).toFixed(2), md = -(Math.random() * 3).toFixed(2);
-  return `<svg class="mascot ${cls}" viewBox="0 0 120 120" aria-hidden="true" style="--bd:${bd}s;--md:${md}s">${m.art()}</svg>`;
+  return `<svg class="mascot ${cls}" data-m="${MASCOTS[key] ? key : 'pot'}" viewBox="0 0 120 120" aria-hidden="true" style="--bd:${bd}s;--md:${md}s">${m.art()}</svg>`;
 }
 const look = r => MASCOTS[r.mascot] || MASCOTS.pot;
 const styleVars = r => { const m = look(r); return `--accent:${m.accent};--accent-ink:${m.ink};--wash:${m.wash}`; };
@@ -1241,7 +1297,7 @@ $('#view').addEventListener('keydown', e => {
 /* main click handling for the view */
 $('#view').addEventListener('click', async e => {
   const chip = e.target.closest('[data-filter]');
-  if (chip) { filter = chip.dataset.filter; renderHome(); return; }
+  if (chip) { if (Fling.justDragged) return; filter = chip.dataset.filter; renderHome(); const on = $('.crew-mate.on .mascot'); if (on) playTrick(on); return; }
   const li = e.target.closest('li[data-step]'); if (li) { toggleStep(li); return; }
   const ph = e.target.closest('[data-photo]');
   if (ph) { const r = find(route().id); if (r) openLightbox(photoSrc(r.photos[+ph.dataset.photo])); return; }
@@ -1720,6 +1776,126 @@ function openSyncModal(){
     }
   });
 }
+
+/* =====================================================================
+   3D & interactive touches
+   ===================================================================== */
+const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+/* 1. cards tilt toward the finger / cursor with a glossy glare */
+$('#view').addEventListener('pointermove', e => {
+  if (calm) return;
+  const card = e.target.closest('.card'); if (!card) return;
+  const r = card.getBoundingClientRect();
+  const px = (e.clientX - r.left) / r.width, py = (e.clientY - r.top) / r.height;
+  card.classList.add('tilting');
+  card.style.setProperty('--rx', ((.5 - py) * 14).toFixed(2) + 'deg');
+  card.style.setProperty('--ry', ((px - .5) * 16).toFixed(2) + 'deg');
+  card.style.setProperty('--gx', (px * 100).toFixed(1) + '%');
+  card.style.setProperty('--gy', (py * 100).toFixed(1) + '%');
+});
+const untilt = card => { card.classList.remove('tilting'); ['--rx', '--ry', '--gx', '--gy'].forEach(v => card.style.removeProperty(v)); };
+$('#view').addEventListener('pointerout', e => { const card = e.target.closest('.card'); if (card && !card.contains(e.relatedTarget)) untilt(card); });
+$('#view').addEventListener('pointercancel', e => { const card = e.target.closest('.card'); if (card) untilt(card); });
+// phones that allow it without asking: cards lean with the phone itself
+if (!calm && window.DeviceOrientationEvent && typeof DeviceOrientationEvent.requestPermission !== 'function' && matchMedia('(pointer: coarse)').matches) {
+  let base = null;
+  addEventListener('deviceorientation', e => {
+    if (e.beta == null) return;
+    if (!base) base = { b: e.beta, g: e.gamma };
+    document.documentElement.style.setProperty('--orx', clamp((e.beta - base.b) * -.35, -7, 7).toFixed(2) + 'deg');
+    document.documentElement.style.setProperty('--ory', clamp((e.gamma - base.g) * .35, -7, 7).toFixed(2) + 'deg');
+  });
+}
+
+/* 2 + 3. scroll depth and eyes that follow */
+let ptr = null, frame = false, idle = null;
+function tick(){
+  frame = false;
+  if (!calm) document.documentElement.style.setProperty('--sy', String(Math.round(scrollY)));
+  for (const svg of document.querySelectorAll('svg.mascot')) {
+    const r = svg.getBoundingClientRect();
+    if (!r.width || r.bottom < 0 || r.top > innerHeight) continue;
+    if (!ptr) { svg.style.removeProperty('--lx'); svg.style.removeProperty('--ly'); continue; }
+    const dx = ptr.x - (r.left + r.width / 2), dy = ptr.y - (r.top + r.height * .45);
+    const d = Math.hypot(dx, dy) || 1, m = Math.min(1, d / 160) * 2;
+    svg.style.setProperty('--lx', (dx / d * m).toFixed(2) + 'px');
+    svg.style.setProperty('--ly', (dy / d * m).toFixed(2) + 'px');
+  }
+}
+const queue = () => { if (!frame) { frame = true; requestAnimationFrame(tick); } };
+const seen = e => { ptr = { x: e.clientX, y: e.clientY }; queue(); clearTimeout(idle); idle = setTimeout(() => { ptr = null; queue(); }, 3500); };
+addEventListener('pointermove', seen, { passive:true });
+addEventListener('pointerdown', seen, { passive:true });
+addEventListener('scroll', queue, { passive:true });
+queue();
+
+/* 5. tap a mascot and it does its trick */
+const TRICKS = { prawn:'flip', fish:'bubbles', cake:'candle', donut:'spin', brownie:'squish', cupcake:'jump', cookie:'roll', egg:'wobble',
+  noodles:'steam', chicken:'wobble', pizza:'spin', tomato:'jump', drink:'shake', pot:'steam', icecream:'wobble', sushi:'squish',
+  burger:'squish', croissant:'wobble', dumpling:'steam', strawberry:'jump' };
+function playTrick(svg){
+  const k = 'trick-' + (TRICKS[svg.dataset.m] || 'jump');
+  svg.classList.remove(k); void svg.getBoundingClientRect(); svg.classList.add(k);
+  clearTimeout(svg._trick); svg._trick = setTimeout(() => svg.classList.remove(k), 1500);
+}
+document.addEventListener('click', e => {
+  const svg = e.target.closest && e.target.closest('svg.mascot');
+  if (!svg || svg.closest('.card, .pick, .crew-mate') || Fling.justDragged) return;
+  playTrick(svg);
+});
+
+/* 6. drag & fling the crew (and the footer parade) with springy physics */
+const Fling = { cur: null, justDragged: false };
+addEventListener('pointerdown', e => {
+  const svg = e.target.closest && e.target.closest('.crew-mate .mascot, .parade .mascot');
+  if (!svg || e.button > 0 || calm) return;
+  Fling.cur = { svg, id: e.pointerId, x0: e.clientX, y0: e.clientY, type: e.pointerType, moved: false, hist: [] };
+});
+addEventListener('pointermove', e => {
+  const d = Fling.cur; if (!d || e.pointerId !== d.id) return;
+  const dx = e.clientX - d.x0, dy = e.clientY - d.y0;
+  if (!d.moved) {
+    if (Math.hypot(dx, dy) < 8) return;
+    if (d.type !== 'mouse' && Math.abs(dx) > Math.abs(dy)) { Fling.cur = null; return; } // sideways swipe scrolls the row
+    const r = d.svg.getBoundingClientRect();
+    const fly = d.svg.cloneNode(true); fly.classList.add('flying');
+    Object.assign(fly.style, { left: r.left + 'px', top: r.top + 'px', width: r.width + 'px', height: r.height + 'px' });
+    document.body.appendChild(fly); d.svg.style.visibility = 'hidden';
+    d.fly = fly; d.r = r; d.moved = true;
+  }
+  d.x = dx; d.y = dy;
+  d.hist.push({ x: e.clientX, y: e.clientY, t: performance.now() }); if (d.hist.length > 6) d.hist.shift();
+  d.fly.style.transform = `translate(${dx}px,${dy}px) rotate(${clamp(dx * .15, -25, 25)}deg) scale(1.2)`;
+}, { passive:true });
+function release(e, cancelled){
+  const d = Fling.cur; if (!d || e.pointerId !== d.id) return;
+  Fling.cur = null; if (!d.moved) return;
+  Fling.justDragged = true; setTimeout(() => { Fling.justDragged = false; }, 350);
+  let vx = 0, vy = 0;
+  if (!cancelled && d.hist.length > 1) {
+    const a = d.hist[0], b = d.hist[d.hist.length - 1], dt = Math.max(16, b.t - a.t);
+    vx = clamp((b.x - a.x) / dt * 16, -45, 45); vy = clamp((b.y - a.y) / dt * 16, -45, 45);
+  }
+  let x = d.x, y = d.y, sc = 1.2;
+  const half = d.r.width / 2, cx0 = d.r.left + half, cy0 = d.r.top + d.r.height / 2;
+  const step = () => {
+    vx += -x * .055; vy += -y * .055; vx *= .88; vy *= .88; x += vx; y += vy;
+    // bounce off the screen edges
+    if (cx0 + x < half) { x = half - cx0; vx = Math.abs(vx) * .75; }
+    if (cx0 + x > innerWidth - half) { x = innerWidth - half - cx0; vx = -Math.abs(vx) * .75; }
+    if (cy0 + y < half) { y = half - cy0; vy = Math.abs(vy) * .75; }
+    if (cy0 + y > innerHeight - half) { y = innerHeight - half - cy0; vy = -Math.abs(vy) * .75; }
+    sc += (1 - sc) * .12;
+    d.fly.style.transform = `translate(${x}px,${y}px) rotate(${clamp(vx * 2.2, -40, 40)}deg) scale(${sc})`;
+    if (Math.abs(x) + Math.abs(y) + Math.abs(vx) + Math.abs(vy) > .6) requestAnimationFrame(step);
+    else { d.fly.remove(); d.svg.style.visibility = ''; if (d.svg.isConnected) playTrick(d.svg); }
+  };
+  requestAnimationFrame(step);
+}
+addEventListener('pointerup', e => release(e, false));
+addEventListener('pointercancel', e => release(e, true));
 
 /* =====================================================================
    Footer (with backup for the browser-only version)
